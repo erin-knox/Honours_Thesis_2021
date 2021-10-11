@@ -1,0 +1,49 @@
+---
+title: "Bin description plot"
+author: "Erin Knox"
+date: "11/05/2021"
+output: html_document
+---
+
+```{r}
+
+library(readxl)
+library(tidyverse)
+library(RColorBrewer)
+library(viridis)
+library(ggExtra)
+
+#reading excel spreadsheet
+Gem_bins <- read_excel("~/Desktop/Gem_bins/Gemmatimonadetes_bins.xlsx")
+
+#turning spreadsheet into a dataframe
+gem_bins.df = data.frame(Gem_bins)
+
+
+#assigning variables
+Completeness = gem_bins.df$Completeness
+Contamination = gem_bins.df$Contamination
+Bin_size = gem_bins.df$Bin_Size.Mbp
+Taxonomy = gem_bins.df$Order.and.Family
+
+#making and naming plot
+trialplot <- ggplot(gem_bins.df, aes(x=Completeness, y=Contamination, col = Bin_size)) + geom_point(aes(shape=Taxonomy)) + scale_color_viridis(option = "magma")  
+
+#add marginal density plots
+density_plot <- ggMarginal(trialplot, type = "density")
+
+#view
+density_plot
+
+#Save as PDF
+pdf("~/Desktop/density_plot.pdf", height = 6, width = 10)
+last_plot()
+dev.off()
+
+mean(Contamination)
+sd(Contamination)
+mean(Completeness)
+sd(Completeness)
+
+```
+
