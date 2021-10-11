@@ -1,0 +1,123 @@
+---
+title: "Pathway analysis"
+author: "Erin Knox"
+date: "13/07/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Set seed for reproducibility
+set.seed(2)
+```
+
+```{r Make new phyloseq}
+
+##pathway completeness
+
+setwd("~/Desktop/Results II/enrichm/R_analysis/")
+
+otutable.df = read.csv("CutPhyloseq_Path.csv", row.names = 1)
+colnames(otutable.df) = gsub("X", "", colnames(otutable.df))
+taxtable.df = read.csv("Tax_table_Cut.csv", row.names = 1)
+samdata.df = read.csv("Binsam_data.csv", row.names = 1)
+
+
+OTU = otu_table(otutable.df, taxa_are_rows = T)
+SAM = sample_data(samdata.df)
+TAX = tax_table(as.matrix(taxtable.df))
+taxa_names(OTU)
+
+Path_phyloseq = phyloseq(OTU,
+                            TAX,
+                            SAM)
+
+Path_phyloseq_v0 = Path_phyloseq
+
+```
+
+```{r}
+library("bookdown")
+library(dplyr)
+library(plyr)
+
+#Count of total percentage completeness for categories
+
+#phyloseq to dataframe
+df = psmelt(Path_phyloseq)
+
+#summarise info about data
+sd_data = ddply(df, c("Cluster", "Kegg.Category"), summarise,
+                N = length(Abundance),
+                mean = mean(Abundance),
+                sd = sd(Abundance),
+                se = sd / sqrt(N))
+#view data summary
+sd_data
+
+#Write dataframe to csv file to save
+write.csv(sd_data, "~/Desktop/Pathways.csv", row.names = T)
+
+sd_data2 = sd_data
+
+#assign variables
+KCategory = sd_data2$Kegg.Category
+
+
+##all on same graph - barplot grouped and filled by cluster with error bars
+
+p = ggplot(sd_data2, aes(x = KCategory, y = mean, fill = Cluster)) + geom_bar(stat = "identity", colour="black", size=.3, position = "dodge") + geom_errorbar(aes(ymin=mean-se, ymax=mean+se), size=.3, width=.2, position = position_dodge(.9)) + theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) + ylab("Average Pathway Completeness") + xlab("Kegg Orthology Pathway Category") + scale_fill_manual(values = c(cbPal))
+
+#save
+pdf("Average Genes completeness per cluster.pdf", height = 10, width = 15)
+p
+dev.off()
+
+
+```
+
+```{r enichm vs ORF plot - Genome Streamlining}
+library(readxl)
+library(tidyverse)
+library(RColorBrewer)
+library(viridis)
+library(ggExtra)
+library(ggplot2)
+
+#set working directory
+setwd("~/Desktop/Results II")
+
+#read in spreadsheet as a dataframe
+df = read.csv("~/Desktop/Results II/enrichm/R_analysis/Binsam_data.csv", row.names = 1)
+
+#assign variables
+ORF = df$ORFm
+enrichm = df$enrichm
+Cluster = df$Cluster
+Bin_size = df$Bin_Size.Mbp.
+Completeness = df$Completeness
+Contamination = df$Contamination
+binaverage = df$Average_ratio
+
+#average ratio of ORF:enrichm for the reference line in graph
+average = mean(ORF/enrichm)
+
+#plot as a scatterplot
+p = ggplot(df, aes(enrichm, ORF, color = Cluster, size = Bin_size)) + geom_point()  + geom_abline(intercept = 0, slope =  average) + scale_color_manual(values = c(cbPal))
+
+#view plot
+p
+
+#save as PDF
+pdf("~/Desktop/enrichmORF.pdf", height = 5, width = 7)
+last_plot()
+dev.off()
+
+```
+
+
