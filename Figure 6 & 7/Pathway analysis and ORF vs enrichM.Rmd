@@ -41,7 +41,7 @@ Path_phyloseq_v0 = Path_phyloseq
 
 ```
 
-```{r}
+```{r - Figure 6}
 library("bookdown")
 library(dplyr)
 library(plyr)
@@ -81,7 +81,7 @@ dev.off()
 
 ```
 
-```{r enichm vs ORF plot - Genome Streamlining}
+```{r enichm vs ORF plot - Genome Streamlining - Figure 7}
 library(readxl)
 library(tidyverse)
 library(RColorBrewer)
