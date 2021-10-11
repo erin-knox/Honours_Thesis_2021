@@ -1,0 +1,92 @@
+---
+title: "ANI"
+author: "Erin Knox"
+date: "15/05/2021"
+output: html_document
+---
+
+```{r Basic ANI Plot}
+library(ggplot2)
+library(forcats)
+library(viridis)
+
+#Make ANI plot comparing all Gemmatimonadetes sequences
+
+#load in data
+
+ModANI.df = read.csv(file = "~/Desktop/Graphs/Gems_Heatmaps/>75 <6/Gems_cut_ani_results.csv")
+
+#aassign levels
+ModANI.df$Query.Sequence = factor(ModANI.df$Query.Sequence,
+                                  levels = unique(ModANI.df$Query.Sequence))
+
+ModANI.df$ANI.match
+
+#plot - fct_reorder organises the clusters in the plot
+
+p = ggplot(data=ModANI.df, 
+       mapping = aes(x=fct_reorder(Reference.Sequence, 
+                                   ANI.match, 
+                                   .fun = mean, 
+                                   .desc = T), 
+                     y = fct_reorder(Query.Sequence, 
+                                     ANI.match, 
+                                     .fun = mean, .desc = T), 
+                     fill = ANI.match)) +
+  geom_tile()+
+  xlab("Reference sequence")+
+  ylab("Query Sequence")+
+  scale_fill_viridis(option = "D")+
+  labs(fill = "ANI match (%)")+
+  theme(axis.text.x = element_text(angle = 90))
+
+#save as a PDF
+p
+pdf("~/Desktop/Gems_HeatmapCut.pdf", height = 10, width = 14)
+p
+dev.off()
+```
+
+
+```{r ANI Plot with References}
+
+#Make ANI plot comparing Gemmatimonadetes sequences and references
+
+#load data
+ModANIRef.df = read.csv(file = "~/Desktop/Graphs/Gems_Heatmaps/>75 <6/Gems_cutRef_ani_results.csv")
+
+#assign levels
+ModANIRef.df$Query.Sequence = factor(ModANIRef.df$Query.Sequence,
+                                  levels = unique(ModANIRef.df$Query.Sequence))
+
+
+ModANIRef.df$ANI.match
+#plot heatmap - fct_reorder groups bins into clusters based on ANI match
+ggplot(data=ModANIRef.df, 
+       mapping = aes(x=fct_reorder(Reference.Sequence, 
+                                   ANI.match, 
+                                   .fun = mean, 
+                                   .desc = T), 
+                     y = fct_reorder(Query.Sequence, 
+                                     ANI.match, 
+                                     .fun = mean, 
+                                     .desc = T), 
+                     fill = ANI.match)) +
+  geom_tile()+
+  xlab("Reference sequence")+
+  ylab("Query Sequence")+
+  scale_fill_viridis(option = "D")+
+  labs(fill = "ANI match (%)")+
+  theme(axis.text.x = element_text(angle = 90), panel.grid.major = element_line(colour = "black", size = 0.5),) 
+
+#save as PDF
+pdf("~/Desktop/GemsRef_Heatmap.pdf", height = 10, width = 14)
+last_plot()
+dev.off()
+
+```
+
+
+
+
+
