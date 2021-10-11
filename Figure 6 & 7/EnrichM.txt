@@ -1,0 +1,8 @@
+#enrichm Scripts
+
+#annotate
+enrichm annotate --genome_directory ~/Desktop/enrichm/Samples/Genomes/ --ko_hmm --threads 5 --parallel 8 --force --log Hmmer_KO.log --output enrichm_output
+
+#Classify:
+
+enrichm classify --genome_and_annotation_matrix ~/Desktop/enrichm/enrichm_output/ko_hmm_frequency_table.tsv --output enrichm_classified
