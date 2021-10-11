@@ -1,0 +1,1 @@
+raxml-ng --bootstrap --model PROTAUTO --msa /Users/erinknox/Desktop/Phylophlan/Cut_ORFs/Cut_ORFs_phylophlan/Cut_ORFs.tre
