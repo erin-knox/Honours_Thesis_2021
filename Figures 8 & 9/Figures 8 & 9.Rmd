@@ -50,7 +50,7 @@ df = psmelt(phyloseq)
 ```
 
 
-```{r}
+```{r - Figure 8}
 #assign levels for days to ensure correct order
 
 Days_levels <- c("Day 9", "Day 15", "Day 21","Day 27", "Day 33", "Day 42", "Day 51")
@@ -74,7 +74,7 @@ p
 dev.off()
 ```
 
-```{r}
+```{r - Figure 9}
 #Absolute abundance line graphs
 
 
