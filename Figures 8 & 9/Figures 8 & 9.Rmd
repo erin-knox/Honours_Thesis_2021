@@ -1,0 +1,99 @@
+---
+title: "Relative and absolute abundance of bins"
+author: "Erin Knox"
+date: "17/08/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r Make new phyloseq}
+
+library(phyloseq)
+library(ggplot2)
+library(ggtext)
+library(plyr)
+library(dplyr)
+library(Rmisc)
+library(viridis)
+library(tidyverse)
+```
+
+```{r}
+#set working directory
+setwd("~/Desktop/Results III/Diamond/R_analysis")
+
+#read in otu table and metadata
+otutable.df = read.csv("~/Desktop/Results III/Diamond/R_analysis/Diamond_cluster.csv", row.names = 1)
+samdata.df = read.csv("~/Desktop/Results III/Diamond/R_analysis/sam_data.csv", row.names = 1)
+
+
+#fix column names
+colnames(otutable.df) = gsub(".", " ", colnames(otutable.df), fixed = TRUE)
+
+#assign variables
+OTU = otu_table(otutable.df, taxa_are_rows = F)
+SAM = sample_data(samdata.df)
+
+#check names
+taxa_names(OTU)
+sample_names(SAM)
+
+#create phyloseq object
+phyloseq = phyloseq(OTU,
+                    SAM)
+# melt phyloseq object back into dataframe
+df = psmelt(phyloseq)
+
+```
+
+
+```{r}
+#assign levels for days to ensure correct order
+
+Days_levels <- c("Day 9", "Day 15", "Day 21","Day 27", "Day 33", "Day 42", "Day 51")
+#set the levels as a variable
+days <- factor(df$Day, levels = Days_levels)
+
+#assign variables
+Abun = df$Abundance
+Treatment = df$Treatment
+Cluster = df$Cluster
+
+#plot - stacked barplot facet by treatment
+p = ggplot(df, aes(x= days, y=Abun, group = OTU, fill=OTU)) + facet_wrap(~ Treatment) + geom_bar(position = "fill", stat = "identity") + ylab("Relative Abundance") + xlab("Day") + scale_fill_manual(values = c(cbPal), name = "Cluster") + My_Theme
+
+#view plot
+p
+
+#save as PDF
+pdf("~/Desktop/Relative Abundance.pdf", height = 10, width = 25)
+p
+dev.off()
+```
+
+```{r}
+#Absolute abundance line graphs
+
+
+p = ggplot(df, aes(x = days, y=Abun, group = OTU, color = OTU)) + facet_wrap(~ Treatment) + geom_line() + ylab("Absolute Abundance") + xlab("Day") + scale_color_manual(values = c(cbPal), name = "Cluster") + My_Theme
+p
+
+pdf("~/Desktop/Absolute Abundance_normal.pdf", height = 10, width = 25)
+p
+dev.off()
+
+##log2 Absolute abundance line plot - stops skewing of scale towards extreme values - easier to see changes at lower abundances
+
+#write lael for y-axis
+yl = expression(Absolute ~ Abundance ~ (Log[2]))
+
+p = ggplot(df, aes(x = days, y=log2(Abun), group = OTU, color = OTU)) + facet_wrap(~ Treatment) + geom_line() + ylab(yl) + xlab("Day") + scale_color_manual(values = c(cbPal), name = "Cluster") + My_Theme
+p
+
+pdf("~/Desktop/Absolute Abundance_log2.pdf", height = 10, width = 25)
+p
+dev.off()
+```
